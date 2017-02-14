@@ -4,10 +4,10 @@ project(img_proc)
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
-find_package(catkin REQUIRED COMPONENTS
+find_package(catkin REQUIRED
+  COMPONENTS
   cv_bridge
   image_transport
-  message_generation
 )
 
 ## System dependencies are found with CMake's conventions
@@ -44,11 +44,11 @@ find_package(catkin REQUIRED COMPONENTS
 ##   * add every package in MSG_DEP_SET to generate_messages(DEPENDENCIES ...)
 
 ## Generate messages in the 'msg' folder
-add_message_files(
-  FILES
-  EdgePosition.msg
-  Point.msg
-)
+# add_message_files(
+#   FILES
+#   Message1.msg
+#   Message2.msg
+# )
 
 ## Generate services in the 'srv' folder
 # add_service_files(
@@ -65,10 +65,10 @@ add_message_files(
 # )
 
 ## Generate added messages and services with any dependencies listed here
-generate_messages(
-  DEPENDENCIES
-  std_msgs  # Or other packages containing msgs
-)
+# generate_messages(
+#   DEPENDENCIES
+#   std_msgs  # Or other packages containing msgs
+# )
 
 ################################################
 ## Declare ROS dynamic reconfigure parameters ##
@@ -100,10 +100,10 @@ generate_messages(
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
-#  INCLUDE_DIRS include
-#  LIBRARIES img_proc
-  CATKIN_DEPENDS cv_bridge image_transport message_runtime
-#  DEPENDS system_lib
+  INCLUDE_DIRS include
+  LIBRARIES img_proc
+  CATKIN_DEPENDS cv_bridge image_transport
+  DEPENDS opencv2 flann
 )
 
 ###########
@@ -112,23 +112,22 @@ catkin_package(
 
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
-# include_directories(include)
 include_directories(
-  # include
+	include
   ${catkin_INCLUDE_DIRS}
 )
 
-# set(SOURCE_FILES
-#   src/edge_detector.cpp
-#   src/img_subscriber.cpp
-# )
+ set(SOURCE_FILES
+   src/main.cpp
+   src/img_proc.cpp
+ )
 
-# set(HEADER_FILES
-#   include/edge_detector.h
-# )
+ set(HEADER_FILES
+   include/img_proc.h
+ )
 
 ## Declare a C++ library
-# add_library(img_proc
+# add_library(img_proc_lib
 #   ${SOURCE_FILES}
 #   ${HEADER_FILES}
 # )
@@ -139,18 +138,14 @@ include_directories(
 # add_dependencies(img_proc ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Declare a C++ executable
-add_executable(img_subscriber src/img_subscriber.cpp)
-add_executable(edge_detector src/edge_detector.cpp)
-add_executable(cost src/cost.cpp)
+add_executable(img_proc src/main.cpp src/img_proc.cpp)
 
 ## Add cmake target dependencies of the executable
 ## same as for the library above
 # add_dependencies(img_proc_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Specify libraries to link a library or executable target against
-target_link_libraries(img_subscriber ${catkin_LIBRARIES})
-target_link_libraries(edge_detector ${catkin_LIBRARIES})
-target_link_libraries(cost ${catkin_LIBRARIES})
+target_link_libraries(img_proc ${catkin_LIBRARIES})
 
 #############
 ## Install ##
