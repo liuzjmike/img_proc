@@ -6,7 +6,9 @@ int main(int argc, char **argv)
 {
   ros::init(argc, argv, "img_proc");
   ImageProcessor ip;
-  ip.recordFeature(argv[1], argv[2]);
-  ros::spin();
+  ip.listenFeature(argv[1], argv[2]);
+  ros::AsyncSpinner spinner(2);
+  spinner.start();
+  ros::waitForShutdown();
   return 0;
 }

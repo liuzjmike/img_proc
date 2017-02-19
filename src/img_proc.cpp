@@ -1,6 +1,7 @@
 #include "img_proc.h"
 
 using std::vector;
+using std::string;
 using cv::Mat;
 using cv::Size;
 using namespace flann;
@@ -63,73 +64,97 @@ namespace img_proc
     return sum / dists.rows;
   }
 
-  ImageProcessor::ImageProcessor(const IndexParams& params)
+  ImageProcessor::ImageProcessor(const IndexParams& params, const int loThresh, const int hiThresh)
     : it_(nh_)
-    , record_flag_(false)
-    , lo_thresh_(100)
-    , hi_thresh_(160)
+    , record_seq_(0)
+    , trigger_topic_("record_feature")
+    , lo_thresh_(loThresh)
+    , hi_thresh_(hiThresh)
   {
     params_ = params;
+    service_ = nh_.advertiseService(trigger_topic_, &ImageProcessor::triggerCallback, this);
   }
 
-  void ImageProcessor::recordFeature(char*& imageTopic, char*& jointTopic, const int numRecords,
-    const int loThresh, const int hiThresh)
+  void ImageProcessor::listenFeature(const string& imageTopic, const string& jointTopic)
   {
-    total_ = numRecords;
-    record_seq_ = 0;
-    indices_.clear();
-    joint_states_.clear();
-    lo_thresh_ = loThresh;
-    hi_thresh_ = hiThresh;
+    image_flag_ = joint_flag_ = false;
     img_sub_ = it_.subscribe(imageTopic, 2, &ImageProcessor::featureImageCallback, this);
     joint_sub_ = nh_.subscribe(jointTopic, 2, &ImageProcessor::featureJointCallback, this);
   }
 
-  float ImageProcessor::computeCost(char*& imageTopic, char*& edgeTopic)
+  void ImageProcessor::stopListenFeature()
+  {
+    img_sub_.shutdown();
+    joint_sub_.shutdown();
+  }
+
+  bool ImageProcessor::triggerCallback(std_srvs::TriggerRequest& req, std_srvs::TriggerResponse& res)
+  {
+    res.success = img_sub_ != NULL && img_sub_.getTopic().size() > 0;
+    if(res.success)
+    {
+      image_flag_ = true;
+      joint_flag_ = true;
+      while(image_flag_ || joint_flag_);
+      res.message = "Information recorded";
+    }
+    else
+    {
+      "Subscribers not initialized";
+    }
+    return true;
+  }
+
+  float ImageProcessor::computeCost(const string& imageTopic, const string& jointTopic)
   {
     broadcast_seq_ = 0;
     error_ = 0;
-    joint_pub_ = nh_.advertise<sensor_msgs::JointState>(edgeTopic, 2);
+    image_flag_ = false;
+    joint_pub_ = nh_.advertise<sensor_msgs::JointState>(jointTopic, 2);
     img_sub_ = it_.subscribe(imageTopic, 2, &ImageProcessor::featureImageCallback, this);
-    publishJointState(); //TODO: Needs a separate thread
+    std::thread t(&ImageProcessor::publishJointState, this);
+    t.join();
     return error_;
   }
 
   void ImageProcessor::featureImageCallback(const sensor_msgs::ImageConstPtr& msg)
   {
-    record_flag_ = true;
-    vector<int> edgePoints = convertImage(msg);
-    indices_.push_back(buildIndex(edgePoints, params_));
-    std::cout << record_seq_ << std::endl;
-    record_seq_++;
-    if(record_seq_ >= total_)
+    if(image_flag_)
     {
-      img_sub_.shutdown();
-      joint_sub_.shutdown();
+      vector<int> edgePoints = convertImage(msg);
+      indices_.push_back(buildIndex(edgePoints, params_));
+      std::cout << record_seq_ << std::endl;
+      record_seq_++;
+      image_flag_ = false;
     }
   }
 
   void ImageProcessor::featureJointCallback(const sensor_msgs::JointStateConstPtr& msg)
   {
-    if(record_flag_)
+    if(joint_flag_)
     {
-      record_flag_ = false;
       joint_states_.push_back(*msg);
+      joint_flag_ = false;
     }
   }
 
   void ImageProcessor::queryImageCallback(const sensor_msgs::ImageConstPtr& msg)
   {
-    error_ += diff(indices_[broadcast_seq_], convertImage(msg), 64);
+    if(image_flag_)
+    {
+      error_ += diff(indices_[broadcast_seq_], convertImage(msg), 64);
+      image_flag_ = false;
+    }
     //TODO: Make radius an argument
   }
 
   void ImageProcessor::publishJointState()
   {
-    while(broadcast_seq_ < total_)
+    while(broadcast_seq_ < record_seq_)
     {
       joint_pub_.publish(joint_states_[broadcast_seq_]);
-      //TODO: Wait for img_sub_ to get an image and do the calculation
+      image_flag_ = true;
+      while(image_flag_);
       broadcast_seq_++;
     }
   }
