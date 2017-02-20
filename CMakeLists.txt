@@ -8,6 +8,7 @@ SET(CMAKE_CXX_FLAGS "-std=c++11")
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED
   COMPONENTS
+  message_generation
   cv_bridge
   image_transport
 )
@@ -53,11 +54,10 @@ find_package(catkin REQUIRED
 # )
 
 ## Generate services in the 'srv' folder
-# add_service_files(
-#   FILES
-#   Service1.srv
-#   Service2.srv
-# )
+ add_service_files(
+   FILES
+   ComputeCost.srv
+ )
 
 ## Generate actions in the 'action' folder
 # add_action_files(
@@ -67,10 +67,10 @@ find_package(catkin REQUIRED
 # )
 
 ## Generate added messages and services with any dependencies listed here
-# generate_messages(
-#   DEPENDENCIES
-#   std_msgs  # Or other packages containing msgs
-# )
+ generate_messages(
+   DEPENDENCIES
+   std_msgs  # Or other packages containing msgs
+ )
 
 ################################################
 ## Declare ROS dynamic reconfigure parameters ##
@@ -103,7 +103,7 @@ find_package(catkin REQUIRED
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
   INCLUDE_DIRS include
-  LIBRARIES img_proc
+  LIBRARIES img_proc joint_controller
   CATKIN_DEPENDS cv_bridge image_transport
   DEPENDS opencv2 flann
 )
@@ -120,12 +120,13 @@ include_directories(
 )
 
  set(SOURCE_FILES
-   src/main.cpp
    src/img_proc.cpp
+   src/joint_controller.cpp
  )
 
  set(HEADER_FILES
    include/img_proc.h
+   include/joint_controller.h
  )
 
 ## Declare a C++ library
@@ -140,7 +141,8 @@ include_directories(
 # add_dependencies(img_proc ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Declare a C++ executable
-add_executable(img_proc src/main.cpp src/img_proc.cpp)
+add_executable(img_proc src/img_proc.cpp)
+add_executable(joint_controller src/joint_controller.cpp)
 
 ## Add cmake target dependencies of the executable
 ## same as for the library above
@@ -148,6 +150,7 @@ add_executable(img_proc src/main.cpp src/img_proc.cpp)
 
 ## Specify libraries to link a library or executable target against
 target_link_libraries(img_proc ${catkin_LIBRARIES})
+target_link_libraries(joint_controller ${catkin_LIBRARIES})
 
 #############
 ## Install ##
