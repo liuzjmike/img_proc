@@ -46,7 +46,7 @@ namespace img_proc
     ros::Subscriber joint_sub_;
     ros::Publisher joint_pub_;
 
-    std::vector<flann::Index<flann::L2<int> > > indices_;
+    std::vector<std::vector<int>> indices_;
     std::vector<sensor_msgs::JointState> joint_states_;
 
     int record_seq_, broadcast_seq_, lo_thresh_, hi_thresh_;

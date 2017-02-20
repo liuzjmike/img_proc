@@ -121,7 +121,7 @@ namespace img_proc
     if(image_flag_)
     {
       vector<int> edgePoints = convertImage(msg);
-      indices_.push_back(buildIndex(edgePoints, params_));
+      indices_.push_back(edgePoints);
       std::cout << record_seq_ << std::endl;
       record_seq_++;
       image_flag_ = false;
@@ -145,7 +145,7 @@ namespace img_proc
   {
     if(image_flag_)
     {
-      error_ += diff(indices_[broadcast_seq_], convertImage(msg), 64);
+      error_ += diff(buildIndex(indices_[broadcast_seq_], params_), convertImage(msg), 64);
       std::cout << error_ << std::endl;
       image_flag_ = false;
     }
