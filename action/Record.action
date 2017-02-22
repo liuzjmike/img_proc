@@ -1,0 +1,5 @@
+int32 num_per_joint
+---
+bool success
+---
+float32 percent_finished

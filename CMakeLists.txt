@@ -11,6 +11,8 @@ find_package(catkin REQUIRED
   message_generation
   cv_bridge
   image_transport
+  actionlib
+  actionlib_msgs
 )
 
 ## System dependencies are found with CMake's conventions
@@ -60,15 +62,15 @@ find_package(catkin REQUIRED
  )
 
 ## Generate actions in the 'action' folder
-# add_action_files(
-#   FILES
-#   Action1.action
-#   Action2.action
-# )
+ add_action_files(
+   DIRECTORY action
+   FILES Record.action
+ )
 
 ## Generate added messages and services with any dependencies listed here
  generate_messages(
    DEPENDENCIES
+   actionlib_msgs
    std_msgs  # Or other packages containing msgs
  )
 
@@ -103,8 +105,8 @@ find_package(catkin REQUIRED
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
   INCLUDE_DIRS include
-  LIBRARIES img_proc joint_controller
-  CATKIN_DEPENDS cv_bridge image_transport
+  LIBRARIES img_proc record_controller
+  CATKIN_DEPENDS cv_bridge image_transport actionlib actionlib_msgs
   DEPENDS opencv2 flann
 )
 
@@ -121,12 +123,12 @@ include_directories(
 
  set(SOURCE_FILES
    src/img_proc.cpp
-   src/joint_controller.cpp
+   src/record_controller.cpp
  )
 
  set(HEADER_FILES
    include/img_proc.h
-   include/joint_controller.h
+   include/record_controller.h
  )
 
 ## Declare a C++ library
@@ -142,7 +144,7 @@ include_directories(
 
 ## Declare a C++ executable
 add_executable(img_proc src/img_proc.cpp)
-add_executable(joint_controller src/joint_controller.cpp)
+add_executable(record_controller src/record_controller.cpp)
 
 ## Add cmake target dependencies of the executable
 ## same as for the library above
@@ -150,7 +152,7 @@ add_executable(joint_controller src/joint_controller.cpp)
 
 ## Specify libraries to link a library or executable target against
 target_link_libraries(img_proc ${catkin_LIBRARIES})
-target_link_libraries(joint_controller ${catkin_LIBRARIES})
+ target_link_libraries(record_controller ${catkin_LIBRARIES})
 
 #############
 ## Install ##
