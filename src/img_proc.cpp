@@ -20,7 +20,7 @@ ImageProcessor::ImageProcessor(const IndexParams& params, const int loThresh, co
 , hi_thresh_(hiThresh)
 {
 	params_ = params;
-	compare_service_ = nh_.advertiseService("compute_cost", &ImageProcessor::costCallback, this);
+	compare_server_ = nh_.advertiseService("compute_cost", &ImageProcessor::costCallback, this);
 }
 
 void ImageProcessor::listenFeature(const string& imageTopic, const string& jointTopic)
@@ -28,7 +28,7 @@ void ImageProcessor::listenFeature(const string& imageTopic, const string& joint
 	image_flag_ = joint_flag_ = false;
 	record_img_sub_ = it_.subscribe(imageTopic, 2, &ImageProcessor::featureImageCallback, this);
 	joint_sub_ = nh_.subscribe(jointTopic, 2, &ImageProcessor::featureJointCallback, this);
-	record_service_ = nh_.advertiseService("record_feature", &ImageProcessor::recordCallback, this);
+	record_server_ = nh_.advertiseService("record_feature", &ImageProcessor::recordCallback, this);
 }
 
 Mat ImageProcessor::canny(const Mat& image, const int loThresh, const int hiThresh)
@@ -68,14 +68,7 @@ float ImageProcessor::diff(vector<float> features, vector<float> queries)
 	float sum = 0;
 	for(int i = 0; i < q.rows; i++)
 	{
-		if(indices[i][0] == -1)
-		{
-			sum += 800 * 800 * 2;
-		}
-		else
-		{
-			sum += dists[i][0];
-		}
+		sum += dists[i][0];
 	}
 	return sum / dists.rows;
 }
@@ -147,14 +140,12 @@ void ImageProcessor::publishJointState(const string& jointTopic)
 	joint_pub_ = nh_.advertise<sensor_msgs::JointState>(jointTopic, 2);
 	while(broadcast_seq_ < record_seq_ - 1)
 	{
-		if(!cost_flag_)
-		{
-			std::cout << broadcast_seq_ << std::endl;
-			sensor_msgs::JointState state = joint_states_[broadcast_seq_];
-			state.header.stamp = ros::Time::now();
-			joint_pub_.publish(state);
-			cost_flag_ = true;
-		}
+    std::cout << broadcast_seq_ << std::endl;
+    sensor_msgs::JointState state = joint_states_[broadcast_seq_];
+    state.header.stamp = ros::Time::now();
+    joint_pub_.publish(state);
+    cost_flag_ = true;
+    while(!cost_flag_);
 	}
 }
 
@@ -196,7 +187,7 @@ bool ImageProcessor::samePosition(const vector<double>& position1, const vector<
 int main(int argc, char **argv)
 {
 	ros::init(argc, argv, "img_proc");
-	img_proc::ImageProcessor ip;
+	img_proc::ImageProcessor ip(flann::KDTreeIndexParams(8));
 	ip.listenFeature(argv[1], argv[2]);
 	ros::AsyncSpinner spinner(2);
 	spinner.start();

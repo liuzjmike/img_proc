@@ -38,7 +38,7 @@ private:
 	ros::NodeHandle nh_;
 	image_transport::ImageTransport it_;
 	image_transport::Subscriber record_img_sub_, cost_img_sub_;
-	ros::ServiceServer record_service_, compare_service_;
+	ros::ServiceServer record_server_, compare_server_;
 	ros::Subscriber joint_sub_;
 	ros::Publisher joint_pub_;
 

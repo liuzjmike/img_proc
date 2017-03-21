@@ -1,0 +1,6 @@
+<launch>
+	<node name="img_proc" pkg="img_proc" type="img_proc" args="/sim/rrbot/camera1/image_raw /sim/rrbot/joint_states"/>
+	<node name="record_controller" pkg="img_proc" type="record_controller" args="/sim/rrbot/ joint1 joint2"/>
+	<node name="rviz" pkg="rviz" type="rviz"/>
+	<node name="record_server" pkg="actionlib" type="axclient.py" args="/record"/>
+</launch>

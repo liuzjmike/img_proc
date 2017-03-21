@@ -1,12 +1,15 @@
 #include "ros/ros.h"
-#include <actionlib/server/simple_action_server.h>
-#include <img_proc/RecordAction.h>
-#include <img_proc/RecordActionFeedback.h>
-#include <img_proc/RecordActionResult.h>
+#include "actionlib/server/simple_action_server.h"
+#include "img_proc/RecordAction.h"
+#include "img_proc/RecordActionFeedback.h"
+#include "img_proc/RecordActionResult.h"
+
 #include "std_msgs/Float64.h"
 #include "std_srvs/Trigger.h"
 
 #include <cmath>
+#include <string>
+#include <vector>
 
 #ifndef RECORD_CONTROLLER_H
 #define RECORD_CONTROLLER_H
@@ -16,7 +19,7 @@ namespace img_proc
   class RecordController
   {
   public:
-    RecordController(std::string prefix, std::vector<std::string> joints);
+    RecordController(std::string prefix, std::vector<std::string>& joints);
 
   private:
     void fullRecord(const img_proc::RecordGoalConstPtr &goal);
@@ -27,7 +30,7 @@ namespace img_proc
 
     ros::NodeHandle nh_;
 
-    actionlib::SimpleActionServer<img_proc::RecordAction> as_;
+    actionlib::SimpleActionServer<img_proc::RecordAction> record_server_;
     img_proc::RecordFeedback feedback_;
     img_proc::RecordResult result_;
 

@@ -18,6 +18,9 @@ find_package(catkin REQUIRED
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
 
+find_package(kdl_parser)
+find_package(orocos_kdl)
+
 
 ## Uncomment this if the package has a setup.py. This macro ensures
 ## modules and global scripts declared therein get installed
@@ -59,6 +62,7 @@ find_package(catkin REQUIRED
  add_service_files(
    FILES
    ComputeCost.srv
+   JointChange.srv
  )
 
 ## Generate actions in the 'action' folder
@@ -71,7 +75,7 @@ find_package(catkin REQUIRED
  generate_messages(
    DEPENDENCIES
    actionlib_msgs
-   std_msgs  # Or other packages containing msgs
+   std_msgs
  )
 
 ################################################
@@ -105,9 +109,9 @@ find_package(catkin REQUIRED
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
   INCLUDE_DIRS include
-  LIBRARIES img_proc record_controller
+  LIBRARIES
   CATKIN_DEPENDS cv_bridge image_transport actionlib actionlib_msgs
-  DEPENDS opencv2 flann
+  DEPENDS opencv2 flann kdl_parser orocos_kdl
 )
 
 ###########
@@ -118,17 +122,19 @@ catkin_package(
 ## Your package locations should be listed before other locations
 include_directories(
 	include
-  ${catkin_INCLUDE_DIRS}
+	${catkin_INCLUDE_DIRS}
 )
 
- set(SOURCE_FILES
-   src/img_proc.cpp
-   src/record_controller.cpp
- )
+set(SOURCE_FILES
+	src/img_proc.cpp
+  src/record_controller.cpp
+  src/model_handler.cpp
+)
 
  set(HEADER_FILES
    include/img_proc.h
    include/record_controller.h
+   include/model_handler.h
  )
 
 ## Declare a C++ library
@@ -140,19 +146,23 @@ include_directories(
 ## Add cmake target dependencies of the library
 ## as an example, code may need to be generated before libraries
 ## either from message generation or dynamic reconfigure
-# add_dependencies(img_proc ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+# add_dependencies(img_proc_lib ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Declare a C++ executable
 add_executable(img_proc src/img_proc.cpp)
 add_executable(record_controller src/record_controller.cpp)
+add_executable(model_handler src/model_handler.cpp)
 
 ## Add cmake target dependencies of the executable
 ## same as for the library above
-# add_dependencies(img_proc_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+add_dependencies(img_proc ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+add_dependencies(record_controller ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+add_dependencies(model_handler ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Specify libraries to link a library or executable target against
 target_link_libraries(img_proc ${catkin_LIBRARIES})
- target_link_libraries(record_controller ${catkin_LIBRARIES})
+target_link_libraries(record_controller ${catkin_LIBRARIES})
+target_link_libraries(model_handler ${catkin_LIBRARIES} ${kdl_parser_LIBRARIES} ${orocos_kdl_LIBRARIES})
 
 #############
 ## Install ##
