@@ -3,7 +3,12 @@
 	<storageModule moduleId="org.eclipse.cdt.core.settings">
 		<cconfiguration id="cdt.managedbuild.toolchain.gnu.base.701820515">
 			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="cdt.managedbuild.toolchain.gnu.base.701820515" moduleId="org.eclipse.cdt.core.settings" name="Default">
-				<externalSettings/>
+				<externalSettings>
+					<externalSetting>
+						<entry flags="RESOLVED" kind="includePath" name="/home/mikeliu/catkin_ws/devel/include"/>
+						<entry flags="RESOLVED" kind="includePath" name="/opt/ros/indigo/include/"/>
+					</externalSetting>
+				</externalSettings>
 				<extensions>
 					<extension id="org.eclipse.cdt.core.GNU_ELF" point="org.eclipse.cdt.core.BinaryParser"/>
 					<extension id="org.eclipse.cdt.core.GASErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>

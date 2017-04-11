@@ -22,6 +22,7 @@ void RecordController::fullRecord(const img_proc::RecordGoalConstPtr &goal)
 {
 	feedback_.percent_finished = 0;
 	record_seq_ = 0;
+	total_ = pow(goal->num_per_joint, joint_pub_.size());
 	if((result_.success = recursiveFullRecord(goal->num_per_joint, 0)))
 	{
 		record_server_.setSucceeded(result_);
@@ -58,8 +59,7 @@ bool RecordController::recursiveFullRecord(int numPerJoint, int index)
 			}
 			else
 			{
-				record_seq_++;
-				feedback_.percent_finished = record_seq_ / pow(numPerJoint, joint_pub_.size()) * 100;
+				feedback_.percent_finished = ++record_seq_ / total_ * 100;
 				record_server_.publishFeedback(feedback_);
 			}
 		}

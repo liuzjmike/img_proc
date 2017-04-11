@@ -38,6 +38,7 @@ namespace img_proc
     std::vector<ros::Publisher> joint_pub_;
 
     int record_seq_;
+    float total_;
   };
 }
 
